@@ -56,7 +56,7 @@
     <el-container v-else class="main-layout">
       <el-aside width="350px" class="sidebar">
        
-        <h2 style="text-align: center; padding: 10px 10px 0">{{ title }}</h2>
+        <h2 class="title">{{ title }}</h2>
         <div style="padding: 10px">
           <el-input
             v-model="searchText"
@@ -113,9 +113,12 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import L from 'leaflet'
 import { ElMessage, ElNotification } from 'element-plus'
 import axios from 'axios'
-// ---------------------------------------------------------
-// 設定區 (請替換成你的真實 ID)
-// ---------------------------------------------------------
+import iconUrl from '@/assets/marker-icon.png'
+import iconRetinaUrl from '@/assets/marker-icon-2x.png'
+import shadowUrl from '@/assets/marker-shadow.png'
+
+
+
 const GOOGLE_CLIENT_ID = '737444360335-03fp8kjs1alt73gi9dnr700ki5j12uhc.apps.googleusercontent.com'
 const FB_APP_ID = '1943332376223447'
 
@@ -138,8 +141,13 @@ const openMap = ref(false);
 onMounted(() => {
   loadGoogleSDK()
   loadFacebookSDK()
-})
 
+})
+   L.Icon.Default.mergeOptions({
+  iconRetinaUrl: iconRetinaUrl,
+  iconUrl: iconUrl,
+  shadowUrl: shadowUrl,
+})
 const loadGoogleSDK = () => {
   // 檢查是否已載入 google script
   if (window.google && window.google.accounts) {
@@ -480,7 +488,13 @@ body,
   width: 100vw;
   position: relative;
 }
-
+.title{
+  font-size: 18px;
+  font-weight: bolder;
+  color:#181818;
+  padding: 5px 5px 0;
+  text-align: center;
+}
 /* 登入遮罩 */
 .login-overlay {
   position: fixed;
@@ -545,16 +559,29 @@ body,
   flex-direction: column;
   z-index: 500; /* 確保在 Leaflet 之上 */
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  @media (max-width:575px) {
+       height: 50%;
+        top: 50%;
+        position: absolute;
+        left: 0;
+        width: 100%;
+  }
 }
 
 .sidebar-header {
   padding: 15px;
   background: #409eff;
   color: white;
+  @media (max-width:575px) {
+        padding: 5px 15px;
+  }
 }
 
 .sidebar-header h3 {
   margin: 0 0 5px 0;
+    @media (max-width:575px) {
+       margin: 0;
+    }
 }
 
 .list-container {
@@ -600,6 +627,9 @@ body,
   width: 100%;
   padding: 0 !important;
   position: relative;
+  @media (max-width:575px) {
+    height: 50%;
+  }
 }
 
 #map {
@@ -619,6 +649,9 @@ body,
 }
 
 ::v-deep {
+  .el-divider__text{
+    white-space: nowrap;
+  }
   .el-card__body {
 
     padding: 10px;
