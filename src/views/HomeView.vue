@@ -31,7 +31,6 @@
               <el-button
                 type="primary"
                 size="large"
-                :disabled="!user.google.id"
                 @click="handleFBLogin"
                 style="width: 100%; background-color: #1877f2"
               >
@@ -59,7 +58,6 @@
             type="success"
             size="large"
             class="enter-btn"
-            :disabled="!isFullyAuthenticated"
             color="#4EA476"
             style="color: #fff"
             @click="initSystem"
@@ -185,7 +183,7 @@ const CustomIcon = L.Icon.extend({
   },
 });
 
-// 🎯 新增：定義圖標實例
+// 新增：定義圖標實例
 const defaultMarkerIcon = new CustomIcon({
   iconUrl: iconUrl,
   iconRetinaUrl: iconRetinaUrl,
@@ -286,7 +284,12 @@ const title = ref("");
 // 系統初始化 (進入地圖)
 const initSystem = async () => {
   await nextTick();
-
+  if (!user.google.id) {
+    ElNotification({
+      title: "提示",
+      message: "您尚未登入喔",
+    });
+  }
   initMap();
   openMap.value = true;
 };
@@ -301,7 +304,7 @@ const initMap = () => {
         renderMap([userLocation.lat, userLocation.lng]);
       },
       (err) => {
-        ElMessage.error("無法取得定位，預設為新北市");
+        //ElMessage.error("無法取得定位，預設為新北市");
         // 預設座標 (新北市政府附近)
         userLocation.lat = 25.012;
         userLocation.lng = 121.465;
@@ -333,19 +336,27 @@ const renderMap = (center) => {
 
   // 4. 定義 Tooltip 內容 (雙頭像)
   const tooltipHTML = `
-    <div class="tooltipHTML">
-      <div class="tooltipHTML__img">
-        <img src="${user.google.picture || ""}">
-        <img src="${user.facebook.picture || ""}" style=" margin-left: -13px;">
-      </div>
-      <span style="font-weight: bold; font-size: 14px;">我底加啦!</span>
-    </div>
-  `;
+  <div class="tooltipHTML">
+    ${
+      (user.google && user.google.picture) ||
+      (user.facebook && user.facebook.picture)
+        ? `
+          <div class="tooltipHTML__img">
+                  ${user.google && user.google.picture ? `<img src="${user.google.picture}";">` : ""}
+            ${user.facebook && user.facebook.picture ? `<img src="${user.facebook.picture}"  style="margin-left: -13px“>` : ""}
+        
+          </div>
+        `
+        : ""
+    }
+    <span style="font-weight: bold; font-size: 14px;">我底加啦!</span>
+  </div>
+`;
 
   // 5. 建立 Marker 並綁定 Tooltip
   // 注意：這裡使用了我們剛定義的 defaultMarkerIcon
   L.marker(center, {
-    icon: defaultMarkerIcon, // <--- 關鍵修改：使用自訂圖標
+    icon: defaultMarkerIcon, // 使用自訂圖標
   })
     .addTo(map.value)
     .bindTooltip(tooltipHTML, {
@@ -530,7 +541,7 @@ function colorStyle(index) {
 :root {
   --el-text-color-primary: #767676;
   --el-text-color-placeholder: #408560;
-      --el-color-success: #408560;
+  --el-color-success: #408560;
 }
 
 .el-input {
@@ -736,12 +747,10 @@ body,
   fill: #28b369;
 }
 :deep(.leaflet-left .leaflet-control) {
-
-    margin-left: 376px;
-     @media (max-width: 575px) {
-     margin-left: 10px;
+  margin-left: 376px;
+  @media (max-width: 575px) {
+    margin-left: 10px;
   }
-
 }
 :deep(.leaflet-bar a) {
   background-color: #fff;
